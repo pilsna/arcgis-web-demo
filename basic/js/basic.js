@@ -91,7 +91,7 @@ function(
                     });
                     var html = layers[currentId].popupInfo.description;
                     var formatted = html.format(clickEvent.graphic.attributes)
-                    if (clickEvent.graphic !== undefined) {
+                    if (clickEvent.graphic !== undefined && clickEvent !== null) {
                         var box = document.getElementById("infobox");
                         var text = document.getElementById("infotext");
                         if (clickEvent.graphic.infoTemplate === undefined){
