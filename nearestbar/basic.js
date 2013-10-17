@@ -28,7 +28,10 @@ define([
     "esri/dijit/LocateButton",
     "esri/dijit/HomeButton",
     "esri/geometry/Point",
-    "esri/graphic"
+    "esri/graphic",
+    "esri/tasks/FeatureSet",
+    "esri/tasks/Geoprocessor",
+    "esri/dijit/analysis/FindNearest"
 ],
 function(
     ready, 
@@ -40,7 +43,10 @@ function(
     LocateButton,
     HomeButton,
     Point,
-    Graphic
+    Graphic,
+    FeatureSet,
+    Geoprocessor,
+    FindNearest
 ) {
     return declare("", null, {
         config: {},
@@ -126,6 +132,22 @@ function(
                         response.map.graphics.add(highlightGraphic);
                     }
                 }
+                
+                function locationFound(event) {
+                    var set = new FeatureSet();
+                    var features= [];
+                    features.push(event.graphic);
+                    set.features = features;
+
+
+                }
+                function gpCallback(params){
+
+                }
+                function gpError(error){
+
+                }
+
                 function info(layer) {
                     return 'id=' + layer.id + ' graphicsLayerIds=' + response.map.graphicsLayerIds + ' layerIds=' + response.map.layerIds;
                 }
@@ -141,6 +163,8 @@ function(
                         scale: 50000
                     }, "locatebutton");
                     geoLocate.startup();
+
+                    on(geoLocate, 'locate', locationFound);
 
                     on(this.map, 'click', updateInfo);
                     var closebutton = document.getElementById("closebutton");
