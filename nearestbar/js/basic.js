@@ -139,18 +139,6 @@ function(
                     features.push(event.graphic);
                     set.features = features;
 
-                    var agoUrl = 'http://analysis.arcgis.com/arcgis/rest/services/tasks/GPServer/FindNearest';
-                    var findNearest = new Geoprocessor(agoUrl);
-
-                    var nearLayer = {'featureSet': set};
-                    var params = {};
-                    params.analysisLayer = {};
-                    params.analysisLayer.url = "http://services.arcgis.com/IOUoOe5htfvHsn8J/arcgis/rest/services/CVRbarerEtc/FeatureServer/0";
-                    params.nearlayer = {};
-                    params.nearlayer.featureSet = set;
-                    params.measurementType = "DrivingDistance";
-
-                    findNearest.execute(params, gpCallback, gpError);
 
                 }
                 function gpCallback(params){
