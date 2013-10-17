@@ -31,7 +31,7 @@ define([
     "esri/graphic",
     "esri/tasks/FeatureSet",
     "esri/tasks/Geoprocessor",
-    "esri/dijit/analysis/FindNearest"
+    "esri/dijit/analysis/AnalysisBase"
 ],
 function(
     ready, 
@@ -46,7 +46,7 @@ function(
     Graphic,
     FeatureSet,
     Geoprocessor,
-    FindNearest
+    AnalysisBase
 ) {
     return declare("", null, {
         config: {},
@@ -139,11 +139,40 @@ function(
                     features.push(event.graphic);
                     set.features = features;
 
+                    // process(set); // use geoprocessor
+                    findNearest(set); // use FindNearest analysis task 
 
                 }
+                
+                function process(featureSet){   
+                    var agoUrl = 'http://analysis.arcgis.com/arcgis/rest/services/tasks/GPServer/FindNearest';
+                    var findNearest = new Geoprocessor(agoUrl);
+
+                    var nearLayer = {'featureSet': set};
+                    var params = {};
+                    params.analysisLayer = {};
+                    params.analysisLayer.url = "http://services.arcgis.com/IOUoOe5htfvHsn8J/arcgis/rest/services/CVRbarerEtc/FeatureServer/0";
+                    params.nearlayer = {};
+                    params.nearlayer.featureSet = featureSet;
+                    params.measurementType = "DrivingDistance";
+
+                    findNearest.execute(params, gpCallback, gpError);
+                }
+
+                function findNearest(featureSet){
+					var nearest = new FindNearest({
+							analysisLayer: polygonLayer,
+							nearLayers: [pointLayer],
+							map: map,
+							portalUrl: "http://www.arcgis.com"
+						}, "nope");
+
+                }
+
                 function gpCallback(params){
 
                 }
+
                 function gpError(error){
 
                 }
@@ -151,6 +180,7 @@ function(
                 function info(layer) {
                     return 'id=' + layer.id + ' graphicsLayerIds=' + response.map.graphicsLayerIds + ' layerIds=' + response.map.layerIds;
                 }
+
                 if (this.map.loaded) {
                     var home = new HomeButton({
                         map: this.map
@@ -160,7 +190,7 @@ function(
 
                     geoLocate = new LocateButton({
                         map: this.map,
-                        scale: 50000
+                        scale: 20000
                     }, "locatebutton");
                     geoLocate.startup();
 
