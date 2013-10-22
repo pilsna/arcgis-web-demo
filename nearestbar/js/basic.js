@@ -31,7 +31,9 @@ define([
         "esri/tasks/Geoprocessor",
         "esri/dijit/analysis/AnalysisBase",
         "esri/dijit/analysis/FindNearest",
-        "esri/IdentityManagerBase"
+        "esri/IdentityManagerBase",
+        "dijit/_WidgetBase",
+        "esri/layers/FeatureLayer"
     ],
     function(
         ready,
@@ -48,7 +50,9 @@ define([
         Geoprocessor,
         AnalysisBase,
         FindNearest,
-        IdentityManagerBase
+        IdentityManagerBase,
+        _WidgetBase,
+        FeatureLayer
 
     ) {
         return declare("", null, {
@@ -142,75 +146,78 @@ define([
                     function locationFound(event) {
                         var set = new FeatureSet();
                         var features = [];
+                        var feature = event.graphic;
+                        feature.attributes = {
+                            OBJECTID: 1
+                        };
                         features.push(event.graphic);
                         set.features = features;
 
-                        // process(set); // use geoprocessor
                         nearest(set); // use FindNearest analysis task 
-
-                    }
-
-                    function process(featureSet) {
-                        var agoUrl = 'http://analysis.arcgis.com/arcgis/rest/services/tasks/GPServer/FindNearest';
-                        var findNearest = new Geoprocessor(agoUrl);
-
-                        var nearLayer = {
-                            'featureSet': set
-                        };
-                        var params = {};
-                        params.analysisLayer = {};
-                        params.analysisLayer.url = "http://services.arcgis.com/IOUoOe5htfvHsn8J/arcgis/rest/services/CVRbarerEtc/FeatureServer/0";
-                        params.nearlayer = {};
-                        params.nearlayer.featureSet = featureSet;
-                        params.measurementType = "DrivingDistance";
-
-                        findNearest.execute(params, gpCallback, gpError);
                     }
 
                     function nearest(featureSet) {
-                        //console.log(response.map._layers[0]._json);
-                        /**
-                            isOutputLayerItemUpdated: !1,
-                            analysisGpServer: null,
-                            toolName: null,
-                            portalUrl: null,
-                            jobParams: null,
-                            itemParams: null,
-                            gp: null,
-                            resultParameter: null,
-                            signInPromise: null,
-                            */
                         var customAnalysisWidget = declare([_WidgetBase, AnalysisBase], {});
                         var near = new customAnalysisWidget({
                             toolName: "FindNearest",
                             portalUrl: "http://www.arcgis.com",
-                            resultParameter: "resultLayer"
+                            resultParameter: "connectingLinesLayer"
                         });
 
-                        var barUrl = response.itemInfo.itemData.operationalLayers[0].url;
-                        var analysisUrl = {
-                            url: barUrl
-                        };
+                        var barLayer = response.itemInfo.itemData.operationalLayers[0];
+                        var analysisUrl = JSON.stringify({
+                            url: barLayer.url
+                        });
+                        var field = {
+                            name: "OBJECTID",
+                            type: "esriFieldTypeOID",
+                            alias: "OBJECTID"
 
+                        };
+                        var fields = [field];
+                        var spatial = barLayer.layerObject.spatialReference;
+                        var definition = {
+                            geometryType: "esriGeometryPoint",
+                            fields: fields,
+                            spatialReference: spatial
+                        };
+                        console.log(definition);
                         var params = {
                             jobParams: {
-                                analysisLayer: analysisUrl,
-                                nearLayers: featureSet,
+                                nearLayer: analysisUrl,
+                                analysisLayer: JSON.stringify({
+                                    featureSet: featureSet.toJson(),
+                                    layerDefinition: definition
+                                }),
                                 context: JSON.stringify({
                                     extent: response.map.extent.toJson()
                                 }),
                                 measurementType: "DrivingDistance",
+                                maxCount: 1,
+                                searchCutoff: 1,
+                                searchCutoffUnits: "Kilometers",
                                 returnFeatureCollection: true
                             }
                         };
                         near.execute(params);
-                        on(near, ("job-fail", gpError));
-                        on(near, ("job-result", gpCallback));
-                        on(near, ("job-status", gpCallback));
+                        near.on("job-fail", gpError);
+                        near.on("job-result", gpCallback);
+                        //on(near, ("job-status", gpCallback));
 
                     }
 
                     function gpCallback(params) {
+                        response.map.graphics.clear();
+                        var symbol = new esri.symbol.SimpleFillSymbol(
+                            esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                            new esri.symbol.SimpleLineSymbol(
+                                esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                                new dojo.Color("purple")),
+                            new dojo.Color("blue"));
+                        array.forEach(params.value.featureSet.features, function(geometry, i) {
+                            var nearest = new esri.Graphic(geometry, symbol);
+                            response.map.graphics.add(nearest);
+                        });
                         console.log("callback");
                         console.log(params);
                     }
