@@ -2,7 +2,11 @@ if (!String.prototype.format) {
     String.prototype.format = function() {
         var args = arguments[0];
         return this.replace(/{(\w+)}/g, function(match, key) {
-            return ((typeof args[key] !== undefined) && (args[key] !== null)) ? convert(args[key]) : '&nbsp;';
+            return (
+                (typeof args[key] !== undefined) 
+                && (args[key] !== null)
+                && (args[key] !== undefined)
+                ) ? convert(args[key]) : '&nbsp;';
         });
     };
 }
@@ -161,7 +165,7 @@ define([
                         var near = new customAnalysisWidget({
                             toolName: "FindNearest",
                             portalUrl: "http://www.arcgis.com",
-                            resultParameter: "connectingLinesLayer"
+                            resultParameter: "connectingLinesLayer" //"nearestLayer" 
                         });
 
                         var barLayer = response.itemInfo.itemData.operationalLayers[0];
@@ -192,9 +196,9 @@ define([
                                 context: JSON.stringify({
                                     extent: response.map.extent.toJson()
                                 }),
-                                measurementType: "DrivingDistance",
-                                maxCount: 1,
-                                searchCutoff: 1,
+                                measurementType: "StraightLine",
+                                maxCount: 10,
+                                searchCutoff: 10,
                                 searchCutoffUnits: "Kilometers",
                                 returnFeatureCollection: true
                             }
@@ -210,12 +214,14 @@ define([
                         response.map.graphics.clear();
                         var symbol = new esri.symbol.SimpleLineSymbol(
                                 esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                                new dojo.Color("purple"), 4);
-                        array.forEach(params.value.featureSet.features, function(feature, i) {
+                                new dojo.Color("purple"), 8);
+                        /* array.forEach(params.value.featureSet.features, function(feature, i) {
                             var nearest = new esri.Graphic(feature.geometry, symbol);
                             console.log(nearest);
                             response.map.graphics.add(nearest);
-                        });
+                        }); */
+                        var layer = new FeatureLayer(params.value);
+                        response.map.addLayer(layer);
                         console.log("callback");
                         console.log(params);
                     }
@@ -238,7 +244,7 @@ define([
 
                         geoLocate = new LocateButton({
                             map: this.map,
-                            scale: 20000
+                            scale: 30000
                         }, "locatebutton");
                         geoLocate.startup();
 
