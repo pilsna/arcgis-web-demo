@@ -208,14 +208,12 @@ define([
 
                     function gpCallback(params) {
                         response.map.graphics.clear();
-                        var symbol = new esri.symbol.SimpleFillSymbol(
-                            esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                            new esri.symbol.SimpleLineSymbol(
+                        var symbol = new esri.symbol.SimpleLineSymbol(
                                 esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                                new dojo.Color("purple")),
-                            new dojo.Color("blue"));
-                        array.forEach(params.value.featureSet.features, function(geometry, i) {
-                            var nearest = new esri.Graphic(geometry, symbol);
+                                new dojo.Color("purple"), 4);
+                        array.forEach(params.value.featureSet.features, function(feature, i) {
+                            var nearest = new esri.Graphic(feature.geometry, symbol);
+                            console.log(nearest);
                             response.map.graphics.add(nearest);
                         });
                         console.log("callback");
