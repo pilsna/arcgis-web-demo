@@ -27,6 +27,7 @@ html,body {
 	background: white;
 	padding: 15px;
 	visibility: hidden;
+	font-size: 20px;
 }
 
 @media (min-width: 731px) {
