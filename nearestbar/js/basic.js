@@ -226,8 +226,8 @@ define([
                                     extent: response.map.extent.toJson()
                                 }),
                                 measurementType: "DrivingDistance",
-                                maxCount: 3,
-                                searchCutoff: 3,
+                                maxCount: 4,
+                                searchCutoff: 4,
                                 searchCutoffUnits: "Kilometers",
                                 returnFeatureCollection: true
                             }
@@ -276,7 +276,8 @@ define([
 
                         geoLocate = new LocateButton({
                             map: this.map,
-                            scale: 30000
+                            scale: 30000,
+                            symbol: getPicMarker('arrow.png')
                         }, "locatebutton");
                         geoLocate.startup();
 
@@ -288,7 +289,7 @@ define([
                             this.parentElement.style.visibility = 'hidden';
                         });
                         
-                        zoomToPoint();
+                        //zoomToPoint();
 
                         this._mapLoaded();
                     } else {
