@@ -239,7 +239,7 @@ define([
 
                     }
                     function getPicMarker(name){
-                    		return new esri.symbol.PictureMarkerSymbol('/nearestbar/img/' + name, 48, 48)
+                    		return new esri.symbol.PictureMarkerSymbol('/arcgis-web-demo/nearestbar/img/' + name, 48, 48)
                     }
 
                     function gpCallback(params) {
