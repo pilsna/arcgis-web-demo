@@ -277,7 +277,12 @@ define([
                         geoLocate = new LocateButton({
                             map: this.map,
                             scale: 30000,
-                            symbol: getPicMarker('arrow.png')
+                            symbol: getPicMarker('arrow.png'),
+                            geolocationOptions: {
+                                    maximumAge: 0,
+                                    timeout: 15000,
+                                    enableHighAccuracy: true
+                            }
                         }, "locatebutton");
                         geoLocate.startup();
 
