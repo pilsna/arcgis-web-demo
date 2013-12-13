@@ -1,0 +1,3 @@
+[submodule "buslines-demo"]
+	path = buslines-demo
+	url = https://github.com/pilsna/buslines-demo.git
